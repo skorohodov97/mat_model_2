@@ -10,6 +10,8 @@ class CalculatorComponent(QWidget):
         self.spin_boxes = {}
 
         layout = QVBoxLayout()
+        self.setObjectName("calculator_component")
+        self.setStyleSheet("#calculator_component { border: 1px solid #C0C0C0; border-radius: 8px; padding: 10px; }")
 
         # Title
         title_label = QLabel(title)
@@ -17,14 +19,20 @@ class CalculatorComponent(QWidget):
         layout.addWidget(title_label)
 
         # Variables descriptions
+        desc_widget = QWidget()
+        desc_layout = QVBoxLayout(desc_widget)
         for symbol, desc in variables.items():
-            desc_label = QLabel(f"{symbol} - {desc}")
-            layout.addWidget(desc_label)
+            display_symbol = self._format_symbol(symbol)
+            desc_label = QLabel(f"{display_symbol} - {desc}")
+            desc_label.setTextFormat(Qt.RichText)
+            desc_layout.addWidget(desc_label)
+        layout.addWidget(desc_widget)
 
         # Input fields
         for symbol in variables.keys():
             hbox = QHBoxLayout()
-            symbol_label = QLabel(symbol)
+            symbol_label = QLabel(self._format_symbol(symbol))
+            symbol_label.setTextFormat(Qt.RichText)
             spin_box = QDoubleSpinBox()
             spin_box.setRange(0, 1000000)
             spin_box.setDecimals(2)
@@ -57,6 +65,24 @@ class CalculatorComponent(QWidget):
         layout.addWidget(self.result_edit)
 
         self.setLayout(layout)
+
+    def _format_symbol(self, symbol):
+        if not symbol:
+            return ""
+
+        first = symbol[0]
+        rest = symbol[2:] if len(symbol) > 1 and symbol[1] == "_" else symbol[1:]
+        mapping = {
+            "ft": "фт",
+            "mr": "мр",
+            "VVST": "ВВСТ",
+            "shtat": "штат",
+            "isp": "испр",
+            "sovr": "совр"
+        }
+        parts = rest.split("_")
+        ru_rest = "".join(mapping.get(part, part) for part in parts)
+        return f"{first}<sub>{ru_rest}</sub>"
 
     def calculate(self):
         values = {symbol: spin.value() for symbol, spin in self.spin_boxes.items()}
