@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QDoubleSpinBox, QPushButton, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QDoubleSpinBox, QPushButton, QHBoxLayout, QLineEdit, QMessageBox
 from PySide6.QtCore import Qt
 
 class CalculatorComponent(QWidget):
@@ -51,9 +51,10 @@ class CalculatorComponent(QWidget):
         calc_button.clicked.connect(self.calculate)
         layout.addWidget(calc_button)
 
-        # Result label
-        self.result_label = QLabel("Результат: ")
-        layout.addWidget(self.result_label)
+        # Result edit
+        self.result_edit = QLineEdit("Результат: ")
+        self.result_edit.setReadOnly(True)
+        layout.addWidget(self.result_edit)
 
         self.setLayout(layout)
 
@@ -62,8 +63,10 @@ class CalculatorComponent(QWidget):
         try:
             result = self.calc_function(**values)
             if self.is_percentage:
-                self.result_label.setText(f"Результат: {result:.2f}%")
+                self.result_edit.setText(f"Результат: {result:.2f}%")
             else:
-                self.result_label.setText(f"Результат: {result:.4f}")
+                self.result_edit.setText(f"Результат: {result:.4f}")
+        except ZeroDivisionError:
+            QMessageBox.warning(self, "Ошибка", "Деление на ноль! Проверьте введённые значения.")
         except Exception as e:
-            self.result_label.setText(f"Ошибка: {str(e)}")
+            QMessageBox.warning(self, "Ошибка", f"Произошла ошибка: {str(e)}")
